@@ -150,7 +150,7 @@ INTERVAL vreg[26];
 #ifndef YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
 #line 31 "calc1.y"
-typedef union
+typedef union YYSTYPE
 {
 	int ival;
 	double dval;
@@ -195,7 +195,7 @@ extern int YYPARSE_DECL();
 #define CONST 259
 #define UMINUS 260
 #define YYERRCODE 256
-typedef short YYINT;
+typedef int YYINT;
 static const YYINT calc1_lhs[] = {                       -1,
     3,    3,    0,    0,    0,    0,    0,    1,    1,    1,
     1,    1,    1,    1,    1,    2,    2,    2,    2,    2,

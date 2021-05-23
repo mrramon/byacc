@@ -151,7 +151,7 @@ extern symbol *mksymbol(type t, class c, name id);
 #ifndef YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
 #line 41 "err_inherit4.y"
-typedef union
+typedef union YYSTYPE
 {
     class	cval;
     type	tval;
@@ -219,7 +219,7 @@ extern int YYPARSE_DECL();
 #define INTEGER 260
 #define NAME 261
 #define YYERRCODE 256
-typedef short YYINT;
+typedef int YYINT;
 static const YYINT err_inherit4_lhs[] = {                -1,
     5,    6,    0,    0,    3,    3,    4,    4,    1,    1,
     2,

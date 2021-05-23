@@ -117,7 +117,7 @@ static void YYERROR_DECL();
 #ifndef YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
 #line 43 "ok_syntax1.y"
-typedef union
+typedef union YYSTYPE
 {
     char *	cval;
     int		ival;
@@ -178,7 +178,7 @@ extern int YYPARSE_DECL();
 #define VT 272
 #define UMINUS 273
 #define YYERRCODE 256
-typedef short YYINT;
+typedef int YYINT;
 static const YYINT ok_syntax1_lhs[] = {                  -1,
     0,    0,    0,    1,    1,    2,    2,    2,    2,    2,
     2,    2,    2,    2,    2,    2,    3,    3,

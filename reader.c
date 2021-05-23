@@ -1,4 +1,4 @@
-/* $Id: reader.c,v 1.84 2020/09/10 20:26:13 tom Exp $ */
+/* $Id: reader.c,v 1.88 2021/05/20 23:57:23 tom Exp $ */
 
 #include "defs.h"
 
@@ -223,7 +223,7 @@ line_directive(void)
 
     if (ld == ldOK)
     {
-	size_t need = (size_t) (name_end - name_1st);
+	size_t need = (size_t)(name_end - name_1st);
 	if ((long)need > (long)input_file_name_len)
 	{
 	    input_file_name_len = ((need + 1) * 3) / 2;
@@ -451,7 +451,7 @@ static struct keyword
 keywords[] = {
     { "binary",      NONASSOC },
     { "code",        XCODE },
-    { "debug",       XXXDEBUG },
+    { "debug",       NONPOSIX_DEBUG },
 #if defined(YYBTYACC)
     { "destructor",  DESTRUCTOR },
 #endif
@@ -779,7 +779,7 @@ copy_code(void)
 		    cline++;
 		}
 		code_lines[pos].lines = msdone(code_mstr);
-		code_lines[pos].num = (size_t) cline;
+		code_lines[pos].num = (size_t)cline;
 		return;
 	    }
 	    break;
@@ -902,7 +902,7 @@ copy_union(void)
 
     if (!lflag)
 	fprintf(text_file, line_format, lineno, input_file_name);
-    puts_both("typedef union");
+    puts_both("typedef union YYSTYPE");
 
     depth = 0;
   loop:
@@ -1142,7 +1142,7 @@ copy_param(int k)
 	}
 	if (buf == 0)
 	{
-	    buf_size = (size_t) linesize;
+	    buf_size = (size_t)linesize;
 	    buf = TMALLOC(char, buf_size);
 	    NO_SPACE(buf);
 	}
@@ -1154,7 +1154,7 @@ copy_param(int k)
 	    if (line == NULL)
 		unexpected_EOF();
 	    --cptr;
-	    buf_size += (size_t) linesize;
+	    buf_size += (size_t)linesize;
 	    tmp = TREALLOC(char, buf, buf_size);
 	    NO_SPACE(tmp);
 	    buf = tmp;
@@ -1567,7 +1567,7 @@ get_tag(void)
 
     FREE(t_line);
     havetags = 1;
-    return cache_tag(cache, (size_t) cinc);
+    return cache_tag(cache, (size_t)cinc);
 }
 
 #if defined(YYBTYACC)
@@ -1578,7 +1578,7 @@ scan_id(void)
 
     while (IS_NAME2(UCH(*cptr)))
 	cptr++;
-    return cache_tag(b, (size_t) (cptr - b));
+    return cache_tag(b, (size_t)(cptr - b));
 }
 #endif
 
@@ -1890,8 +1890,8 @@ read_declarations(void)
 	    break;
 #endif
 
-	case XXXDEBUG:
-	    /* XXX: FIXME */
+	case NONPOSIX_DEBUG:
+	    tflag = 1;
 	    break;
 
 	case POSIX_YACC:
@@ -2042,7 +2042,7 @@ parse_id(char *p, char **save)
 	p++;
     if (save)
     {
-	*save = cache_tag(b, (size_t) (p - b));
+	*save = cache_tag(b, (size_t)(p - b));
     }
     return p;
 }
@@ -2687,7 +2687,7 @@ copy_action(void)
     trialaction = (*cptr == L_BRAC);
 #endif
 
-    fprintf(f, "case %d:\n", nrules - 2);
+    fprintf(f, "case %ld:\n", (long)(nrules - 2));
 #if defined(YYBTYACC)
     if (backtrack)
     {
@@ -2759,10 +2759,12 @@ copy_action(void)
 		else if (i > maxoffset)
 		{
 		    dollar_warning(d_lineno, i);
-		    fprintf(f, "yystack.l_mark[%d].%s", i - maxoffset, tag);
+		    fprintf(f, "yystack.l_mark[%ld].%s",
+			    (long)(i - maxoffset), tag);
 		}
 		else if (offsets)
-		    fprintf(f, "yystack.l_mark[%d].%s", offsets[i], tag);
+		    fprintf(f, "yystack.l_mark[%ld].%s",
+			    (long)offsets[i], tag);
 		FREE(d_line);
 		goto loop;
 	    }
@@ -2820,7 +2822,7 @@ copy_action(void)
 		tag = rhs[offsets[i]]->tag;
 		if (tag == 0)
 		    untyped_rhs(i, rhs[offsets[i]]->name);
-		fprintf(f, "yystack.l_mark[%d].%s", offsets[i], tag);
+		fprintf(f, "yystack.l_mark[%ld].%s", (long)offsets[i], tag);
 	    }
 	    else
 	    {
@@ -2829,10 +2831,10 @@ copy_action(void)
 		else if (i > maxoffset)
 		{
 		    dollar_warning(lineno, i);
-		    fprintf(f, "yystack.l_mark[%d]", i - maxoffset);
+		    fprintf(f, "yystack.l_mark[%ld]", (long)(i - maxoffset));
 		}
 		else if (offsets)
-		    fprintf(f, "yystack.l_mark[%d]", offsets[i]);
+		    fprintf(f, "yystack.l_mark[%ld]", (long)offsets[i]);
 	    }
 	    goto loop;
 	}
@@ -3354,6 +3356,16 @@ mark_symbol(void)
 	     ((c = cptr[4]) == 'c' || c == 'C') &&
 	     ((c = cptr[5], !IS_IDENT(c))))
 	cptr += 5;
+    else if ((c == 'e' || c == 'E') &&
+	     ((c = cptr[2]) == 'm' || c == 'M') &&
+	     ((c = cptr[3]) == 'p' || c == 'P') &&
+	     ((c = cptr[4]) == 't' || c == 'T') &&
+	     ((c = cptr[5]) == 'y' || c == 'Y') &&
+	     ((c = cptr[6], !IS_IDENT(c))))
+    {
+	cptr += 6;
+	return (1);
+    }
     else
 	syntax_error(lineno, line, cptr);
 
